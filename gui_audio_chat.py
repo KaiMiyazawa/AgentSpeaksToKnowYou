@@ -569,10 +569,10 @@ class ChatWindow(QMainWindow):
 		# 文章を出す =============================================
 		# アンケートデータの整形============================================================================================================
 		# アンケートのデータ読み込み
-		df_questionnaire = pd.read_csv("性格特性と文章の捉え方についての調査_2024年7月22日_03.26.csv", header=0)
+		df_questionnaire = pd.read_csv("性格特性と文章の捉え方についての調査_2024年7月22日_03.26_masked.csv", header=0)
 
 		df_result = df_questionnaire.drop(df_questionnaire.index[0:2])
-		df_result = df_result.drop(df_questionnaire.columns[0:19], axis=1)
+		df_result = df_result.drop(df_questionnaire.columns[0:12], axis=1)
 
 		df_int = df_result.astype(int)
 		df_int["Openness"] = [y_pred_openness] * len(df_int)
@@ -599,6 +599,7 @@ class ChatWindow(QMainWindow):
 		]
 
 		text_columns = [col for col in df_int.columns if col.endswith("_6")]
+		print(text_columns)
 		text_columns.remove("Q3.1_6")
 		text_columns.extend(["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"])
 
