@@ -51,9 +51,7 @@ python3 gui_audio_chat.py
 
 ## Author
 - 宮澤 快
-- 天神原 正大
-- 小出 采依
-- (super thanks to 西村茉鈴)
+- 他、研究室の同期2名、研究室の院生の先輩1名
 
 ## Licence
 later ...
