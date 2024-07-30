@@ -1,8 +1,11 @@
+# 初めての人が見てもわかるように、丁寧で簡潔なコメントアウトを書くように心がけてください。
+
+# 必要なライブラリをインポート
 import sys
 from openai import OpenAI
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton
 from PyQt5.QtGui import QTextCursor
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QThread
 import os
 from pydub import AudioSegment
 import time
@@ -11,31 +14,31 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import re
+import pyaudio
+import wave
 
+# モジュールをインポート
 import list_var
-
 from InputWindow import InputWindowGender, InputWindowAge, InputWindowEmployment
 
 global index
 index = -1
 
-
+# OpenAI APIを使用するためのクライアントを作成
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# メッセージのリストを作成
 msg = [{"role": "system", "content": "ユーザーのパーソナリティを引き出すような会話をするシステムです。ユーザーが話している話題について、相手が興味があると思われることについて質問してください。簡潔な質問を返答するようにしてください。質問を考えるにあたって、ユーザーのパーソナリティがわかるような質問をしてください。"},
 	{"role": "user", "content": "こんにちは。何か話題はありますか？"},]
 
-import pyaudio
-import wave
-from PyQt5.QtCore import QThread
-
+# 音声録音クラス
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 
 class AudioRecorder(QThread):
-
+	# クラスの初期化
 	def __init__(self):
 		super().__init__()
 		self.frames = []
@@ -43,6 +46,7 @@ class AudioRecorder(QThread):
 		self.progress_symbol = ["｜", "／", "ー", "＼"]
 		self.progress_index = 0
 
+	# 音声録音を開始する
 	def run(self):
 		self.is_recording = True
 		audio = pyaudio.PyAudio()
@@ -62,8 +66,7 @@ class AudioRecorder(QThread):
 			waveFile.setframerate(RATE)
 			waveFile.writeframes(b''.join(self.frames))
 
-		#self.finished.emit(f"./user_audios/{index}.wav")
-
+	# 音声録音を停止する
 	def stop(self):
 		self.is_recording = False
 
@@ -88,7 +91,10 @@ class AudioRecorder(QThread):
 
 #		self.result_area.append("性格診断結果")
 
+# ChatWindowクラス
 class ChatWindow(QMainWindow):
+
+	# クラスの初期化
 	def __init__(self):
 		super().__init__()
 		self.initUI()
@@ -97,6 +103,7 @@ class ChatWindow(QMainWindow):
 		self.user_wav_file = []
 		self.user_text_file = []
 
+	# UIの初期化
 	def initUI(self):
 		self.setWindowTitle('ChatGPT Desktop App')
 		self.setGeometry(100, 100, 800, 600)
@@ -113,11 +120,6 @@ class ChatWindow(QMainWindow):
 
 		input_layout = QHBoxLayout()
 
-		#self.send_button = QPushButton('送信')
-		#self.send_button.clicked.connect(self.send_message)
-		#input_layout.addWidget(self.send_button)
-		#self.send_button.setEnabled(False)
-
 		self.record_button = QPushButton('録音開始')
 		self.record_button.clicked.connect(self.toggle_recording)
 		input_layout.addWidget(self.record_button)
@@ -128,34 +130,13 @@ class ChatWindow(QMainWindow):
 
 		layout.addLayout(input_layout)
 
-	#def send_message(self):
-	#	self.finish_button.setEnabled(False)
-	#	audio_file = open(f"./user_audios/{index}.wav", "rb")
-	#	transcription = client.audio.transcriptions.create(
-	#		model="whisper-1",
-	#		file=audio_file,
-	#		language="ja"
-	#	)
-	#	transcription_text_file = f"./user_texts/{index}.txt"
-	#	with open(transcription_text_file, "w", encoding='utf-8') as f:
-	#		f.write(transcription.text)
-	#	self.created_files.append(transcription_text_file)
-	#	self.user_text_file.append(transcription_text_file)
-	#	user_message = transcription.text
-	#	if user_message:
-	#		self.chat_area.append(f"You: {user_message}")
-	#		self.process_message(user_message)
-	#	self.record_button.setEnabled(True)
-	#	#self.send_button.setEnabled(False)
-	#	self.finish_button.setEnabled(True)
-
+	# 録音ボタンのトグル
 	def toggle_recording(self):
 		global index
 		if not self.audio_recorder.is_recording:
 			index += 1
 			self.audio_recorder.start()
 			self.record_button.setText("録音終了")
-			#self.send_button.setEnabled(False)
 			self.finish_button.setEnabled(False)
 			self.chat_area.append("Recording started...")
 			self.start_progress_indicator()
@@ -166,12 +147,8 @@ class ChatWindow(QMainWindow):
 			self.created_files.append(f"./user_audios/{index}.wav")
 			self.user_wav_file.append(f"./user_audios/{index}.wav")
 			self.record_button.setText("録音開始")
-			#self.send_button.setEnabled(True)
 			self.finish_button.setEnabled(True)
 			self.chat_area.append("")
-			#self.record_button.setEnabled(False)
-			#wait 1 second
-			#time.sleep(1)
 			time.sleep(0.5)
 			self.finish_button.setEnabled(False)
 			audio_file = open(f"./user_audios/{index}.wav", "rb")
@@ -189,10 +166,9 @@ class ChatWindow(QMainWindow):
 			if user_message:
 				self.chat_area.append(f"You: {user_message}")
 				self.process_message(user_message)
-			#self.record_button.setEnabled(True)
-			#self.send_button.setEnabled(False)
 			self.finish_button.setEnabled(True)
 
+	# システム音声を再生する
 	def play_system_audio(self):
 		system_audio_file_path = f"./system_audios/{index}.wav"
 		system_audio_file_path_mp3 = f"./system_audios/{index}.mp3"
@@ -202,7 +178,6 @@ class ChatWindow(QMainWindow):
 			model='tts-1',
 			voice='alloy',
 			input=self.system_responce,
-			#voice='ja-JP-Wavenet-A',
 		) as response:
 			response.stream_to_file(system_audio_file_path_mp3)
 		audio_mp3 = AudioSegment.from_mp3(system_audio_file_path_mp3)
@@ -218,6 +193,7 @@ class ChatWindow(QMainWindow):
 		os.system(f"afplay {system_audio_file_path}")
 		# wait for the audio to finish playing
 
+	# メッセージを処理する
 	def process_message(self, message):
 		try:
 			msg.append({"role": "user", "content": message})
@@ -235,10 +211,10 @@ class ChatWindow(QMainWindow):
 			play_audio_thread = threading.Thread(target=self.play_system_audio)
 			play_audio_thread.daemon = True
 			play_audio_thread.start()
-			#self.play_system_audio()
 		except Exception as e:
 			self.chat_area.append(f"エラーが発生しました: {str(e)}\n")
 
+	# プログレスインジケータを更新する
 	def update_progress_indicator(self):
 		self.chat_area.moveCursor(self.chat_area.textCursor().Start)
 		self.chat_area.moveCursor(self.chat_area.textCursor().End)
@@ -248,13 +224,14 @@ class ChatWindow(QMainWindow):
 		cursor.insertText(self.audio_recorder.progress_symbol[self.audio_recorder.progress_index])
 		self.audio_recorder.progress_index = (self.audio_recorder.progress_index + 1) % 4
 
+	# プログレスインジケータを開始する
 	def start_progress_indicator(self):
 		self.timer = QTimer()
 		self.chat_area.append(' ')
 		self.timer.timeout.connect(self.update_progress_indicator)
 		self.timer.start(100)
 
-
+	# 性別、年齢、職業を受け取る
 	def receive_gender_info(self, info):
 		self.gender = info
 
@@ -266,12 +243,10 @@ class ChatWindow(QMainWindow):
 		if info == 'nan':
 			self.employment = np.nan
 
+	# プログラムの終了と同時に、性格診断結果を表示する
 	def finish(self):
 		self.record_button.setEnabled(False)
 		self.finish_button.setEnabled(False)
-		#self.send_button.setEnabled(False)
-		#result_window = ResultWindow()
-		#result_window.show()
 
 		# concatenate user_wav_file ========================
 		combined = AudioSegment.empty()
@@ -306,16 +281,10 @@ class ChatWindow(QMainWindow):
 			feature_level=FeatureLevel.Functionals,
 		)
 
-		#gender = input('性別を入力してください。男:"Male" 女:"Female" ')
-		##['Employed' 'Homemaker' 'Student' nan 'Retired' 'Unable to work']
-		#employment = input('職業を入力してください。働いている:"Employed" 主婦:"Homemaker" 学生:"Student" 退職:"Retired" 就労不能:"Unable to work" その他:"nan" ')
-		##20-29' '30-39' '40-49' '-19' '50-59' '60-69']
-		#age = input('年齢を入力してください。: 19歳以下:"-19" 20代:"20-29" 30代:"30-39" 40代:"40-49" 50代:"50-59" 60代以上:"60-69" ')
-
+		# 性別、年齢、職業を入力する
 		self.input_window = InputWindowGender()
 		self.input_window.info_submitted.connect(self.receive_gender_info)
 		self.input_window.exec_()
-
 
 		self.input_window = InputWindowAge()
 		self.input_window.info_submitted.connect(self.receive_age_info)
@@ -325,8 +294,7 @@ class ChatWindow(QMainWindow):
 		self.input_window.info_submitted.connect(self.receive_employment_info)
 		self.input_window.exec_()
 
-
-
+		# openSMILEを使って音声データを処理する
 		fs, x = wavfile.read(combined_file_path)
 		x = x / np.iinfo(x.dtype).max
 		result = smile.process_signal(x, fs)
@@ -354,7 +322,6 @@ class ChatWindow(QMainWindow):
 
 		file_path_text_csv = f"./csvs/text.csv"
 		text_df.to_csv(file_path_text_csv, index=False, encoding='utf-8')
-
 		# ==================================================
 
 		# make dataframe for personality prediction with NLP ======
@@ -371,17 +338,6 @@ class ChatWindow(QMainWindow):
 
 		text_df_bi = text_df_const.copy()
 
-
-
-
-
-
-
-
-
-
-
-
 		text_df_bi["dummy_19"] = text_df_bi["age"].apply(lambda x: 1 if x == "-19" else 0)
 		text_df_bi["dummy_gender"] = text_df_bi["gender"].apply(lambda x: 1 if x == "male" else 0)
 		text_df_bi["dummy_student"] = text_df_bi["employment"].apply(lambda x: 1 if x == "Student" else 0)
@@ -395,6 +351,7 @@ class ChatWindow(QMainWindow):
 
 		categorical = ['gender', 'age', 'employment']
 
+		# MeCabを使って形態素解析を行う
 		import MeCab
 		from collections import Counter
 
@@ -430,7 +387,6 @@ class ChatWindow(QMainWindow):
 		text_df_bi = text_df_bi.drop(columns=['interlocutor_id'])
 		text_df_bi = text_df_bi.drop(columns=['text'])
 
-
 		text_columns_list = ['average_speech_length', '副詞', '接頭辞', '動詞', '助動詞', '補助記号', '名詞', '助詞', '形容詞', '形状詞', '代名詞', '感動詞', '連体詞', '接尾辞', '記号', '接続詞', '空白']
 		#この形式のデータフレームを作成する
 		text_df_bi = text_df_bi.reindex(columns=text_columns_list, fill_value=0)
@@ -441,7 +397,7 @@ class ChatWindow(QMainWindow):
 		fillFalse_list = ['gender_Female', 'gender_Male', 'age_-19', 'age_20-29', 'age_30-39', 'age_40-49', 'age_50-59', 'age_60-69', 'employment_Employed', 'employment_Homemaker', 'employment_Retired', 'employment_Student', 'employment_Unable to work']
 		text_df_bi[fillFalse_list] = False
 
-
+		# 適当にカラムの補完をする
 		if self.gender == 'Male':
 			text_df_bi['gender_Male'] = True
 		else:
@@ -488,9 +444,7 @@ class ChatWindow(QMainWindow):
 		print("openness", y_pred_openness)
 		self.chat_area.append(f"Openness: {y_pred_openness}")
 
-
 		# Conscientiousness
-
 		model_conscientiousness = lgb.Booster(model_file='models/model_conscientiousness.txt')
 		y_pred_conscientiousness = model_conscientiousness.predict(x, num_iteration=model_conscientiousness.best_iteration)
 		print("conscientiousness", y_pred_conscientiousness)
@@ -508,7 +462,6 @@ class ChatWindow(QMainWindow):
 		print("agreeableness", y_pred_agreeableness)
 		self.chat_area.append(f"Agreeableness: {y_pred_agreeableness}")
 
-
 		# Neuroticism
 		model_neuroticism = lgb.Booster(model_file='models/model_neuroticism.txt')
 		y_pred_neuroticism = model_neuroticism.predict(x, num_iteration=model_neuroticism.best_iteration)
@@ -516,6 +469,7 @@ class ChatWindow(QMainWindow):
 		self.chat_area.append(f"Neuroticism: {y_pred_neuroticism}")
 
 		# =========================================================
+
 		print('\n')
 		self.chat_area.append("\n音声診断結果\n")
 
@@ -693,8 +647,7 @@ class ChatWindow(QMainWindow):
 		self.chat_area.append("音声的特徴による性格診断結果")
 		self.chat_area.append(f"文章: {sentence_voice}, 作者: {author_voice}")
 
-
-
+	# ウィンドウを閉じるときに、録音を停止し、作成されたファイルを削除する
 	def closeEvent(self, event):
 		self.audio_recorder.stop()
 
@@ -711,9 +664,7 @@ class ChatWindow(QMainWindow):
 
 		event.accept()
 
-
-
-
+# メイン関数
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
 	chat_window = ChatWindow()
