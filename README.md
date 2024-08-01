@@ -15,8 +15,8 @@
 ## Usage
 first time:
 ```bash
-git clone ***
-cd ***
+git clone git@github.com:KaiMiyazawa/AgentSpeaksToKnowYou.git
+cd AgentSpeaksToKnowYou
 ```
 ```bash
 export OPENAI_API_KEY='<your_api_key here>'
@@ -96,4 +96,4 @@ LLM技術を中心に、音声認識技術、合成音声技術、機械学習�
 - 実際のコードのコメントアウトを読みつつ、理解する
 - なんとなく理解したら、自分でコードを書いてみる
 - 雑なスパゲッティコードなので、もっとシンプルに書けると思います。工夫のしどころです。
-- [実際のコードはこちら](./gui_audio_chat.py)
+- [実際のコードはこちら](https://github.com/KaiMiyazawa/AgentSpeaksToKnowYou/blob/main/gui_audio_chat.py)

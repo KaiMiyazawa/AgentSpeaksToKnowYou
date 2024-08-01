@@ -148,3 +148,28 @@ class InputWindowEmployment(QDialog):
 	def submit_info(self, info):
 		self.info_submitted.emit(info)
 		self.close()
+
+class DisplayResultWindow(QDialog):
+	def __init__(self, sentence_text, author_text, sentence_voice, author_voice):
+		super().__init__()
+
+		self.setWindowTitle("Result Window")
+		self.setGeometry(150, 150, 300, 200)
+
+		self.layout = QVBoxLayout()
+
+		### Sentence with author
+		#test_sentence = "ものごとには 知るタイミング、 っていうのがあるの。 \\n いったんそれを逃したら、 知らないままでいたほうが いいこともあるんじゃないかな。\\n 少なくとも、 しかるべき次のタイミングが 来るまではね。"
+		#sentence_text = test_sentence
+		sentence_text = sentence_text.replace("\\n", "<br>")
+		print(sentence_text)
+		self.sentence_label = QLabel(f"<br><h2 style='text-align: center;'>「{sentence_text}」</h2><br><div style='text-align: right;'>{author_text}</div><br><br>", self)
+		self.layout.addWidget(self.sentence_label)
+
+		### Sentence voice with author voice
+		sentence_voice = sentence_voice.replace("\\n", "<br>")
+		print(sentence_voice)
+		self.sentence_voice = QLabel(f"<h2 style='text-align: center;'>「{sentence_voice}」</h2><br><div style='text-align: right;'>{author_voice}</div>", self)
+		self.layout.addWidget(self.sentence_voice)
+
+		self.setLayout(self.layout)

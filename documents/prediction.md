@@ -4,7 +4,7 @@
 1. [性格診断に用いるデータの収集方法を理解する](./dataset.md)
 1. 特徴量抽出と機械学習による性格推定を理解する
 1. [システム全体の構成方法を理解する](./system.md)
-1. [実際のコードはこちら](../gui_audio_chat.py)
+1. [実際のコードはこちら](https://github.com/KaiMiyazawa/AgentSpeaksToKnowYou/blob/main/gui_audio_chat.py)
 
 また、特徴量抽出には、音声の包括的な特徴量抽出をしてくれるopenSMILEと、形態素解析をしてくれるMeCabを用いています。
 今回のシステムの性格診断には、lightGBMという機械学習アルゴリズムを用いています。

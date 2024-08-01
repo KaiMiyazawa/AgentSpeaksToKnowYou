@@ -4,7 +4,7 @@
 1. [性格診断に用いるデータの収集方法を理解する](./dataset.md)
 1. [特徴量抽出と機械学習による性格推定を理解する](./prediction.md)
 1. システム全体の構成方法を理解する
-1. [実際のコードはこちら](../gui_audio_chat.py)
+1. [実際のコードはこちら](https://github.com/KaiMiyazawa/AgentSpeaksToKnowYou/blob/main/gui_audio_chat.py)
 
 ## 1~3の技術を組み合わせたシステムの構築
 各部品を駆動するプログラム全体はPythonで記述されています。
@@ -23,4 +23,4 @@
 
 性格推定の開始を担うボタンを押すと、別ウィンドウが開き、性格推定に使われるメタデータを入力するためのGUIが表示されます。このGUIには、性格推定に使われる音声データとテキストデータのファイル名、性別、年齢、就労状況をボタンによる選択で入力することができます。
 
-next: [実際のコードはこちら](../gui_audio_chat.py)
+next: [実際のコードはこちら](https://github.com/KaiMiyazawa/AgentSpeaksToKnowYou/blob/main/gui_audio_chat.py)

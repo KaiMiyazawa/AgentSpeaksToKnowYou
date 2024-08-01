@@ -19,7 +19,7 @@ import wave
 
 # モジュールをインポート
 import list_var
-from InputWindow import InputWindowGender, InputWindowAge, InputWindowEmployment
+from InputWindow import InputWindowGender, InputWindowAge, InputWindowEmployment, DisplayResultWindow
 
 global index
 index = -1
@@ -105,7 +105,7 @@ class ChatWindow(QMainWindow):
 
 	# UIの初期化
 	def initUI(self):
-		self.setWindowTitle('ChatGPT Desktop App')
+		self.setWindowTitle('AIと会話して、おすすめの文芸の一節を教えてもらおう！')
 		self.setGeometry(100, 100, 800, 600)
 
 		central_widget = QWidget()
@@ -127,6 +127,7 @@ class ChatWindow(QMainWindow):
 		self.finish_button = QPushButton('性格診断')
 		self.finish_button.clicked.connect(self.finish)
 		input_layout.addWidget(self.finish_button)
+		self.finish_button.setEnabled(False)
 
 		layout.addLayout(input_layout)
 
@@ -518,6 +519,7 @@ class ChatWindow(QMainWindow):
 		print("factor5", y_pred_factor5)
 		self.chat_area.append(f"Factor5: {y_pred_factor5}")
 
+		print('\n')
 		# =========================================================
 
 		# 文章を出す =============================================
@@ -553,7 +555,6 @@ class ChatWindow(QMainWindow):
 		]
 
 		text_columns = [col for col in df_int.columns if col.endswith("_6")]
-		print(text_columns)
 		text_columns.remove("Q3.1_6")
 		text_columns.extend(["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"])
 
@@ -589,7 +590,7 @@ class ChatWindow(QMainWindow):
 		sentence_text = df_sentences.iloc[most_similar_question_number - 1, 0]
 		author_text = df_sentences.iloc[most_similar_question_number - 1, 1]
 
-		print(f"sentence: {sentence_text}, author: {author_text}")
+		#print(f"sentence: {sentence_text}, author: {author_text}")
 
 		# factor5 to text =================================================
 
@@ -640,12 +641,20 @@ class ChatWindow(QMainWindow):
 		sentence_voice = df_sentences.iloc[most_similar_question_number - 1, 0]
 		author_voice = df_sentences.iloc[most_similar_question_number - 1, 1]
 
-		print(f"sentence: {sentence_voice}, author: {author_voice}")
+		#print(f"sentence: {sentence_voice}, author: {author_voice}")
 
-		self.chat_area.append("言語的特徴による性格診断結果")
+		self.chat_area.append("\n言語的特徴による性格診断結果\n")
 		self.chat_area.append(f"文章: {sentence_text}, 作者: {author_text}")
-		self.chat_area.append("音声的特徴による性格診断結果")
+		self.chat_area.append("\n音声的特徴による性格診断結果\n")
 		self.chat_area.append(f"文章: {sentence_voice}, 作者: {author_voice}")
+
+		# =========================================================
+
+		# 結果を表示する
+		self.result_window = DisplayResultWindow(sentence_text, author_text, sentence_voice, author_voice)
+		self.result_window.show()
+
+
 
 	# ウィンドウを閉じるときに、録音を停止し、作成されたファイルを削除する
 	def closeEvent(self, event):
