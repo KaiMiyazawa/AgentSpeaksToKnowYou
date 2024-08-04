@@ -25,8 +25,16 @@ export OPENAI_API_KEY='<your_api_key here>'
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+brew install ffmpeg
+pip install mecab-python3
+brew install mecab-unidic
 mkdir csvs user_audios user_texts system_audios system_texts
-
+```
+```bash
+echo 'export MECABRC=/opt/homebrew/etc/mecabrc' >> ~/.zshrc
+source ~/.zshrc
+```
+```
 python3 gui_audio_chat.py
 ```
 
